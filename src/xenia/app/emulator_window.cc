@@ -809,9 +809,20 @@ void EmulatorWindow::FileDrop(const std::filesystem::path& filename) {
   if (!emulator_initialized_) {
     return;
   }
+
+  // Check if the file is unsupported (e.g., XNA/.NET)
+  if (IsUnsupportedGame(filename)) {
+    xe::ui::ImGuiDialog::ShowMessageBox(
+        imgui_drawer_.get(), "Unsupported Game",
+        "This game is not supported by the emulator.\n\nXNA/.NET games are not supported.");
+    return;
+  }
+
   auto result = emulator_->LaunchPath(filename);
   if (XFAILED(result)) {
-    // TODO: Display a message box.
+    xe::ui::ImGuiDialog::ShowMessageBox(
+        imgui_drawer_.get(), "Title Launch Failed!",
+        "Failed to launch title.\n\nCheck xenia.log for technical details.");
     XELOGE("Failed to launch target: {:08X}", result);
   }
 }
@@ -841,9 +852,20 @@ void EmulatorWindow::FileOpen() {
   if (!path.empty()) {
     // Normalize the path and make absolute.
     auto abs_path = std::filesystem::absolute(path);
+
+    // Check if the file is unsupported (e.g., XNA/.NET)
+    if (IsUnsupportedGame(abs_path)) {
+      xe::ui::ImGuiDialog::ShowMessageBox(
+          imgui_drawer_.get(), "Unsupported Game",
+          "This game is not supported by the emulator.\n\nXNA/.NET games are not supported.");
+      return;
+    }
+
     auto result = emulator_->LaunchPath(abs_path);
     if (XFAILED(result)) {
-      // TODO: Display a message box.
+      xe::ui::ImGuiDialog::ShowMessageBox(
+          imgui_drawer_.get(), "Title Launch Failed!",
+          "Failed to launch title.\n\nCheck xenia.log for technical details.");
       XELOGE("Failed to launch target: {:08X}", result);
     }
   }
@@ -1019,6 +1041,24 @@ void EmulatorWindow::SetInitializingShaderStorage(bool initializing) {
   }
   initializing_shader_storage_ = initializing;
   UpdateTitle();
+}
+
+bool EmulatorWindow::IsUnsupportedGame(const std::filesystem::path& path) {
+  // Add logic to detect unsupported games (e.g., XNA/.NET)
+  // For example, check the file extension or read the file header.
+  // This is a placeholder implementation.
+  std::string extension = path.extension().string();
+  std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+
+  // Example: Check for XNA/.NET-related file extensions or metadata.
+  if (extension == ".xna" || extension == ".net") {
+    return true;
+  }
+
+  // You can also read the file header to detect unsupported formats.
+  // For example, check for specific magic numbers or metadata.
+
+  return false;
 }
 
 }  // namespace app

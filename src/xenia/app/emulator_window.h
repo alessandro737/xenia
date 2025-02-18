@@ -143,6 +143,9 @@ class EmulatorWindow {
   void ShowFAQ();
   void ShowBuildCommit();
 
+  // New function to check if a game is unsupported (e.g., XNA/.NET)
+  bool IsUnsupportedGame(const std::filesystem::path& path);
+
   Emulator* emulator_;
   ui::WindowedAppContext& app_context_;
   EmulatorWindowListener window_listener_;
